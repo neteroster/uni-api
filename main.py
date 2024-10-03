@@ -80,8 +80,21 @@ async def lifespan(app: FastAPI):
     # 启动时的代码
     await create_tables()
 
-    TIMEOUT = float(os.getenv("TIMEOUT", 100))
-    timeout = httpx.Timeout(connect=15.0, read=TIMEOUT, write=30.0, pool=30.0)
+    app.state.config, app.state.api_keys_db, app.state.api_list = await load_config(app)
+    config = app.state.config
+
+    CONNECT_TIMEOUT = float(config.get('CONNECT_TIMEOUT', 6.0))
+    READ_TIMEOUT = float(config.get('READ_TIMEOUT', 10.0))
+    WRITE_TIMEOUT = float(config.get('WRITE_TIMEOUT', 30.0))
+    POOL_TIMEOUT = float(config.get('POOL_TIMEOUT', 30.0))
+
+    timeout = httpx.Timeout(
+        connect=CONNECT_TIMEOUT,
+        read=READ_TIMEOUT,
+        write=WRITE_TIMEOUT,
+        pool=POOL_TIMEOUT
+    )
+    
     default_headers = {
         "User-Agent": "curl/7.68.0",  # 模拟 curl 的 User-Agent
         "Accept": "*/*",  # curl 的默认 Accept 头
@@ -94,7 +107,7 @@ async def lifespan(app: FastAPI):
         follow_redirects=True,  # 自动跟随重定向
     )
     # app.state.client = httpx.AsyncClient(timeout=timeout)
-    app.state.config, app.state.api_keys_db, app.state.api_list = await load_config(app)
+    
     yield
     # 关闭时的代码
     await app.state.client.aclose()
