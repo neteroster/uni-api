@@ -94,7 +94,7 @@ async def lifespan(app: FastAPI):
         write=WRITE_TIMEOUT,
         pool=POOL_TIMEOUT
     )
-    
+
     default_headers = {
         "User-Agent": "curl/7.68.0",  # 模拟 curl 的 User-Agent
         "Accept": "*/*",  # curl 的默认 Accept 头
@@ -519,8 +519,13 @@ async def process_request(request: Union[RequestModel, ImageGenerationRequest, A
         engine = "vertex-gemini"
 
     if "o1-preview" in provider['model'][request.model] or "o1-mini" in provider['model'][request.model]:
-        engine = "o1"
-        request.stream = False
+
+        if "all" in provider['model'][request.model]:
+            engine = "gpt"
+            
+        else:
+            engine = "o1"
+            request.stream = False
 
     if endpoint == "/v1/images/generations":
         engine = "dalle"
