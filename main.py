@@ -84,7 +84,7 @@ async def lifespan(app: FastAPI):
     config = app.state.config
 
     CONNECT_TIMEOUT = float(config.get('CONNECT_TIMEOUT', 6.0))
-    READ_TIMEOUT = float(config.get('READ_TIMEOUT', 12.0))
+    READ_TIMEOUT = float(config.get('READ_TIMEOUT', 24.0))
     WRITE_TIMEOUT = float(config.get('WRITE_TIMEOUT', 30.0))
     POOL_TIMEOUT = float(config.get('POOL_TIMEOUT', 30.0))
 
